@@ -1,0 +1,36 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway for distributed microservices architecture",
+  "main": "gateway/server.js",
+  "scripts": {
+    "start": "node gateway/server.js",
+    "dev": "nodemon gateway/server.js",
+    "start:all": "node scripts/start-all-services.js",
+    "start:user": "cd user-service && npm start",
+    "start:product": "cd product-service && npm start",
+    "install:all": "npm install && cd user-service && npm install && cd ../product-service && npm install",
+    "deploy": "bash scripts/deploy-to-vercel.sh",
+    "deploy:gateway": "cd gateway && vercel --prod",
+    "deploy:user": "cd user-service && vercel --prod",
+    "deploy:product": "cd product-service && vercel --prod",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["api-gateway", "microservices", "distributed", "express", "node"],
+  "author": "Your Name",
+  "license": "MIT"
+}
