@@ -11,10 +11,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(helmet());
-app.use(cors());
-app.use(morgan('combined'));
-app.use(express.json());
+if (process.env.HELMET_ENABLED !== 'false') {
+  app.use(helmet());
+}
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+// Logging configuration
+const logFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+app.use(morgan(logFormat));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Service configurations
 const services = {
@@ -167,9 +182,25 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Shutting down gracefully...');
+  process.exit(0);
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 API Gateway running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔒 Helmet enabled: ${process.env.HELMET_ENABLED !== 'false'}`);
+  console.log(`🌐 CORS origin: ${process.env.CORS_ORIGIN || '*'}`);
   console.log(`📡 Forwarding requests to:`);
   console.log(`   - User Service: ${services.userService.url}`);
   console.log(`   - Product Service: ${services.productService.url}`);
+  console.log(`⚙️  Service timeouts: ${services.userService.timeout}ms / ${services.productService.timeout}ms`);
+  console.log(`🔄 Retry attempts: ${services.userService.retries} / ${services.productService.retries}`);
 });
